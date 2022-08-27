@@ -7,7 +7,7 @@ const {c, cpp, node, python, java} = require('compile-run');
 @Injectable()
 export class CodeService {
   async complie(dto: RunDTO): Promise<string> {
-        const { code } = dto;
+        const { code, stdin } = dto;
         // code = String.raw`${code}`;
         console.log(code);
         fs.writeFile('cpp/1.cpp',code,function(err){
@@ -19,7 +19,7 @@ export class CodeService {
         });
     
         let stdout: string = '';
-        let resultPromise = cpp.runFile('cpp/1.cpp', { stdin:''});
+        let resultPromise = cpp.runFile('cpp/1.cpp', { stdin: stdin });
         await resultPromise
           .then(result => {
               console.log(result)
