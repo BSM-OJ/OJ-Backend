@@ -1,12 +1,14 @@
-import { Controller, Get } from '@nestjs/common';
+import { Controller, Get, Body, Post } from '@nestjs/common';
 import { CodeService } from './code.service';
+import { RunDTO } from './dto/run.dto';
+
 
 @Controller('code')
 export class CodeController {
     constructor(private readonly codeService: CodeService) {}
 
-    @Get()
-    async Code(): Promise<string> {
-        return await this.codeService.complie("#include<iostream> \n using namespace std; string a; int main() {cin >> a; cout << a;}");
+    @Post()
+    async Code(@Body() dto: RunDTO): Promise<string> {
+        return await this.codeService.complie(dto);
     }
 }
