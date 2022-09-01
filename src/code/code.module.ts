@@ -3,10 +3,11 @@ import { CodeService } from './code.service';
 import { CodeController } from './code.controller';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { ClassTransformer } from '@nestjs/class-transformer';
+import { DbModule } from 'database/database.module';
 
 @Module({
   imports: [
-        TypeOrmModule.forFeature([]),
+        DbModule,
         ClassTransformer
   ],
   providers: [CodeService],
