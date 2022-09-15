@@ -4,10 +4,10 @@ const mariadb = require('mariadb');
 export const MD_CONNECTION = 'MD_CONNECTION';
 
 const pool = mariadb.createPool({
-    host: 'localhost', 
-    port: 3307,
-    user:'root', 
-    password: 'centos',
+    host: process.env.DB_HOST, 
+    port: Number(process.env.DB_PORT),
+    user: process.env.DB_USER, 
+    password: process.env.DB_PW,
     connectionLimit: 5
 });
 

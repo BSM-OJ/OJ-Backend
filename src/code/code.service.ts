@@ -1,10 +1,15 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Inject } from '@nestjs/common';
 import { RunDTO } from './dto/run.dto';
 var fs = require('fs');
+import { MD_CONNECTION } from 'database/database.module';
 const { c, cpp, node, python, java } = require('compile-run');
 
 @Injectable()
 export class CodeService {
+
+  constructor(@Inject(MD_CONNECTION) private connection: any) {}
+  private conn = this.connection.pool;
+
   async complie(dto: RunDTO): Promise<string> {
     const { code, stdin } = dto;
 
@@ -34,5 +39,12 @@ export class CodeService {
     return stdout;
   }
 
-  
+  async connTest() {
+    try {
+        const result = await this.conn.query("SELECT 1 as val");
+        return result;
+    } catch (err) {
+        throw err;
+    }
+  }
 }

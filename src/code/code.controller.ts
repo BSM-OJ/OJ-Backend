@@ -1,12 +1,11 @@
 import { Controller, Get, Body, Post, Inject } from '@nestjs/common';
-import { MD_CONNECTION } from 'database/database.module';
 import { CodeService } from './code.service';
 import { RunDTO } from './dto/run.dto';
 
 
 @Controller('code')
 export class CodeController {
-    constructor(private readonly codeService: CodeService, @Inject(MD_CONNECTION) private conn: any) {}
+    constructor(private readonly codeService: CodeService) {}
 
     @Post()
     async Code(@Body() dto: RunDTO): Promise<string> {
@@ -15,11 +14,7 @@ export class CodeController {
 
     @Get()
     async connTest() {
-        try {
-            const result = await this.conn.pool.query("SELECT 1 as val");
-            return result;
-        } catch (err) {
-            throw err;
-        }
+        return await this.codeService.connTest();
+        
     }
 }
