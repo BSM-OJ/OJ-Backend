@@ -1,25 +1,48 @@
-import { Injectable, UnauthorizedException } from '@nestjs/common';
+import { Inject, Injectable, UnauthorizedException, UnprocessableEntityException } from '@nestjs/common';
 import { PassportStrategy } from '@nestjs/passport';
 import { ExtractJwt, Strategy } from 'passport-jwt';
-import { Payload } from './jwt.payload';	// 다음에서 곧장 생성할 예정
+import { Payload } from './jwt.payload';
+import { Request } from 'express';
+import { JwtService } from '@nestjs/jwt';
+import { MD_CONNECTION } from 'database/database.module';
+
+const { SECRET_KEY } = process.env;
 
 @Injectable()
 export class JwtStrategy extends PassportStrategy(Strategy) {
-  constructor() {
+  constructor(@Inject(MD_CONNECTION) private connection: any,
+    private jwtService: JwtService) {
     super({
-      // 헤더 Authentication 에서 Bearer 토큰으로부터 jwt를 추출하겠다는 의미
-      jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
-      secretOrKey: 'secret',	// jwt 생성시 비밀키로 사용할 텍스트 (노출 X)
-      ignoreExpiration: false,  // jwt 만료를 무시할 것인지 (기본값: false)
+      jwtFromRequest: ExtractJwt.fromExtractors([
+        (req: Request) => {
+          return req?.cookies?.token;
+        }
+      ]),
+      secretOrKey: SECRET_KEY,
+      passReqToCallback: true,
     });
   }
+  private conn = this.connection.pool;
 
-  async validate(payload: Payload) {
-    const user = payload.sub === '0'
-    if (user) {
-      return user; // request.user에 해당 내용을 넣어준다 (Passport 라이브러리가 해줌)
-    } else {
-      throw new UnauthorizedException('접근 오류');
+  async validate(req: Request) {
+    const token = await this.jwtService.verify(req?.cookies?.token, {
+      secret: SECRET_KEY,
+    });
+    if (token === undefined) {
+      throw new UnauthorizedException();
     }
+    const user = await this.findByEmail(token.email);
+    return user;
+  }
+
+  private async findByEmail(email: string) {
+    const sqlQuerySelect = 'SELECT u.id, u.email, u.nickname, u.submissions, u.problem_solved ';
+    const sqlQueryFrom = 'FROM bsmoj.users u WHERE email = ?'
+    const sqlQuery = sqlQuerySelect + sqlQueryFrom;
+    const params = [email];
+    const user = await this.conn.query(sqlQuery, params, (error: string) => {
+      if (error) throw new UnprocessableEntityException();
+    });
+    return user;
   }
 }
