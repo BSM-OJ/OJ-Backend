@@ -2,19 +2,21 @@ import { Injectable, Inject } from '@nestjs/common';
 import { RunDTO } from './dto/run.dto';
 var fs = require('fs');
 import { MD_CONNECTION } from 'database/database.module';
+import { ComplieResultDTO } from './dto/compile-result.dto';
+import { plainToClass } from 'class-transformer';
 const { c, cpp, node, python, java } = require('compile-run');
 
 @Injectable()
 export class CodeService {
 
-  constructor(@Inject(MD_CONNECTION) private connection: any) {}
+  constructor(@Inject(MD_CONNECTION) private connection: any) { }
   private conn = this.connection.pool;
 
-  async complie(dto: RunDTO): Promise<string> {
-    const { code, stdin } = dto;
+  async complie(dto: RunDTO): Promise<ComplieResultDTO> {
+    const { type, code, stdin } = dto;
 
     // 파일 작성
-    fs.writeFile('public/cpp/1.cpp', code, function (err) {
+    await fs.writeFile(`public/${type}/1.${type}`, code, function (err) {
       if (err === null) {
         console.log('success');
       } else {
@@ -22,29 +24,54 @@ export class CodeService {
       }
     });
 
+    let stderr: string = ''
     let stdout: string = '';
-    let resultPromise = cpp.runFile('public/cpp/1.cpp', { stdin: stdin });
-    // 시간 재기
-    let startTime: number = performance.now();
-    let endTime: number;
+    let runTime: number;
+    let memoryUsage: number;
+
+    const resultPromise = this.RunFile(type, stdin);
+    const startTime: number = performance.now();
     await resultPromise
-    .then(result => {
-      endTime = performance.now();
-      stdout += result.stdout //result object
-    })
-    .catch(err => {
-      console.log(err);
+      .then(result => {
+        const endTime = performance.now();
+        if (result.stderr !== '') {
+          stderr += result.stderr;
+          runTime = (startTime - endTime);
+          memoryUsage = result.memoryUsage;
+        }
+        else {
+          stdout += result.stdout //result object
+          runTime = (endTime - startTime);
+          memoryUsage = result.memoryUsage;
+        }
+      })
+      .catch(err => {
+        console.log(err);
       });
-    console.log(`Result Time : ${endTime - startTime} ms`);
-    return stdout;
+
+    const complieResult: ComplieResultDTO = plainToClass(ComplieResultDTO,
+      {
+        stderr: stderr,
+        stdout: stdout,
+        runTime: runTime,
+        memoryUsage: memoryUsage
+      });
+
+    return complieResult;
   }
 
-  async connTest() {
-    try {
-        const result = await this.conn.query("SELECT 1 as val");
-        return result;
-    } catch (err) {
-        throw err;
+  private async RunFile(type: string, stdin: string) {
+    switch (type) {
+      case "cpp":
+        return cpp.runFile(`public/${type}/1.${type}`, { stdin: stdin });
+      case "c":
+        return c.runFile(`public/${type}/1.${type}`, { stdin: stdin });
+      case "node":
+        return node.runFile(`public/${type}/1.${type}`, { stdin: stdin });
+      case "py":
+        return python.runFile(`public/${type}/1.${type}`, { stdin: stdin });
+      case "java":
+        return java.runFile(`public/${type}/1.${type}`, { stdin: stdin });
     }
   }
 }

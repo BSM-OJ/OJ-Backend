@@ -1,20 +1,18 @@
-import { Controller, Get, Body, Post, Inject } from '@nestjs/common';
+import { Controller, Get, Body, Post, Inject, UseGuards } from '@nestjs/common';
+import { JwtAuthGuard } from 'src/auth/jwt/jwt.guard';
 import { CodeService } from './code.service';
+import { ComplieResultDTO } from './dto/compile-result.dto';
 import { RunDTO } from './dto/run.dto';
 
-
+@UseGuards(JwtAuthGuard)
 @Controller('code')
 export class CodeController {
     constructor(private readonly codeService: CodeService) {}
 
-    @Post()
-    async Code(@Body() dto: RunDTO): Promise<string> {
+    @Post('complie')
+    async Code(@Body() dto: RunDTO): Promise<ComplieResultDTO> {
         return await this.codeService.complie(dto);
     }
 
-    @Get()
-    async connTest() {
-        return await this.codeService.connTest();
-        
-    }
+    // @Post('submit/:ProblemId')
 }

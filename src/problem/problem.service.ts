@@ -38,7 +38,16 @@ export class ProblemService {
         await this.conn.query(sqlQuery, params, (error: string) => {
             if (error) throw new UnprocessableEntityException();
         });
-        return "문제 생성이 완료되었습니다.";
+        const problemId = await this.GetLastId();
+        return problemId[0];
+    }
+
+    private async GetLastId() {
+        const sqlQuerySelect = 'SELECT id AS ProblemId FROM bsmoj.problem ';
+        const sqlQueryOrder = 'ORDER BY id DESC ';
+        const sqlQueryLimit = 'Limit 1';
+        const sqlQuery = sqlQuerySelect + sqlQueryOrder + sqlQueryLimit;
+        return await this.conn.query(sqlQuery);
     }
 
     async ViewProblemInfo(dto: ViewProblemInfoDTO) {
@@ -71,6 +80,14 @@ export class ProblemService {
             return false;
         }
         return array.length == 0;
+    }
+
+    async UploadProblemExampleSet() {
+
+    }
+
+    async UploadProblemAnswerSet() {
+        
     }
 
 }

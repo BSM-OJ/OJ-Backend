@@ -21,7 +21,7 @@ export class UserService {
             password: hashedPassword,
         });
         } catch (error) {
-            throw new UnauthorizedException();
+            throw new UnprocessableEntityException("테이블 접근이 정상적이지 않습니다.");
         }
         return "회원가입이 완료되었습니다.";
     }

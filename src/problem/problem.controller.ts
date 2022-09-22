@@ -29,7 +29,7 @@ export class ProblemController {
     @Post()
     uploadProblem(
         @GetUser() user,
-        @Body() dto: UploadProblemDTO): Promise<string> {
+        @Body() dto: UploadProblemDTO): Promise<number> {
         return this.problemservice.UploadProblem(user, dto);
     }
 
@@ -37,4 +37,16 @@ export class ProblemController {
     deleteProblem(@Param() dto: DeleteProblemDTO) {
         return this.problemservice.DeleteProblem(dto);
     }
+
+    @Post('exampleSet')
+    uploadProblemExampleSet(@Body() dto) {
+        return this.problemservice.UploadProblemExampleSet(); 
+    }
+
+    @Post('answerSet')
+    uploadProblemAnswerSet(@Body() dto) {
+        return this.problemservice.UploadProblemAnswerSet();
+    }
+     
+
 }
