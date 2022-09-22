@@ -1,8 +1,11 @@
 import { Inject, Injectable, NotFoundException, UnprocessableEntityException } from '@nestjs/common';
 import { MD_CONNECTION } from 'database/database.module';
 import { DeleteProblemDTO } from './dto/request/delete-problem.dto';
+import { UploadAnswerDTO } from './dto/request/upload-answer.dto';
+import { UploadExampleDTO } from './dto/request/upload-example.dto';
 import { UploadProblemDTO } from './dto/request/upload-problem.dto';
 import { ViewProblemInfoDTO } from './dto/request/view-problem-info.dto';
+import { v4 as uuid } from 'uuid';
 
 @Injectable()
 export class ProblemService {
@@ -82,12 +85,26 @@ export class ProblemService {
         return array.length == 0;
     }
 
-    async UploadProblemExampleSet() {
-
+    async UploadProblemExample(dto: UploadExampleDTO) {
+        const {problemId, exampleInput, exampleOutput} = dto;
+        const sqlQueryInsert = 'INSERT INTO bsmoj.problem_example_set (id, problem_id, example_input, example_output) ';
+        const sqlQueryValues = 'VALUES(?,?,?,?)';
+        const sqlQuery = sqlQueryInsert + sqlQueryValues;
+        const params = [uuid(), problemId, exampleInput, exampleOutput];
+        await this.conn.query(sqlQuery, params, (error: string) => {
+            if (error) throw new UnprocessableEntityException();
+        });
     }
 
-    async UploadProblemAnswerSet() {
-        
+    async UploadProblemAnswer(dto: UploadAnswerDTO) {
+        const {problemId, answerInput, answerOutput} = dto;
+        const sqlQueryInsert = 'INSERT INTO bsmoj.problem_answer_set (id, problem_id, answer_input, answer_output) ';
+        const sqlQueryValues = 'VALUES(?,?,?,?)';
+        const sqlQuery = sqlQueryInsert + sqlQueryValues;
+        const params = [uuid(), problemId, answerInput, answerOutput];
+        await this.conn.query(sqlQuery, params, (error: string) => {
+            if (error) throw new UnprocessableEntityException();
+        });
     }
 
 }

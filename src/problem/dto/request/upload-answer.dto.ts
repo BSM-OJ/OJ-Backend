@@ -1,9 +1,6 @@
 import { IsNumber, IsString } from 'class-validator'
 
-export class UploadAnswerSetDTO {
-    
-    @IsNumber()
-    id: number;
+export class UploadAnswerDTO {
 
     @IsNumber()
     problemId: number;
@@ -11,7 +8,7 @@ export class UploadAnswerSetDTO {
     @IsString()
     answerInput: string;
 
-    @IsNumber()
-    answerOutput: number;
+    @IsString()
+    answerOutput: string;
 
 }
