@@ -1,5 +1,6 @@
 import { Controller, Post, Body, Get, UseGuards, Res } from '@nestjs/common';
 import { Response } from 'express';
+import { User } from 'src/auth/auth.model';
 import { GetUser } from 'src/auth/getUser.decorator';
 import { JwtAuthGuard } from 'src/auth/jwt/jwt.guard';
 import { CreateUserDTO } from './dto/create-user.dto';
@@ -23,7 +24,7 @@ export class UserController {
 
     @UseGuards(JwtAuthGuard)
     @Get()
-    getUserInfo(@GetUser() user) {
+    getUserInfo(@GetUser() user: User) {
         return user;
     }
 }

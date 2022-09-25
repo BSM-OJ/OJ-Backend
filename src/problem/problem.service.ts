@@ -6,20 +6,21 @@ import { UploadExampleDTO } from './dto/request/upload-example.dto';
 import { UploadProblemDTO } from './dto/request/upload-problem.dto';
 import { ViewProblemInfoDTO } from './dto/request/view-problem-info.dto';
 import { v4 as uuid } from 'uuid';
+import { User } from 'src/auth/auth.model';
 
 @Injectable()
 export class ProblemService {
 
-    constructor(@Inject(MD_CONNECTION) private connection: any) {}
+    constructor(@Inject(MD_CONNECTION) private connection: any) { }
     private conn = this.connection.pool;
-    
+
     async ViewProblem() {
         const sqlQuery = 'SELECT * FROM bsmoj.problem';
         const problems = await this.conn.query(sqlQuery);
         return problems;
     }
 
-    async ViewMyProblem(user) {
+    async ViewMyProblem(user: User) {
         const { id } = user;
         const sqlQuerySelect = 'SELECT * FROM bsmoj.problem ';
         const sqlQueryWhere = 'WHERE writer_id = ?';
@@ -31,7 +32,7 @@ export class ProblemService {
         return problems;
     }
 
-    async UploadProblem(user, dto: UploadProblemDTO) {
+    async UploadProblem(user: User, dto: UploadProblemDTO) {
         const { title, content, sources, time_limit, memory_limit } = dto;
         const { id } = user;
         const sqlQueryInsert = 'INSERT INTO bsmoj.problem (writer_id, title, content, sources, time_limit, memory_limit) ';
@@ -77,7 +78,7 @@ export class ProblemService {
             if (error) throw new UnprocessableEntityException();
         });
     }
-    
+
     private ArrayIsEmpty = <T>(array: T): boolean => {
         if (!Array.isArray(array)) {
             return false;
@@ -86,7 +87,7 @@ export class ProblemService {
     }
 
     async UploadProblemExample(dto: UploadExampleDTO) {
-        const {problemId, exampleInput, exampleOutput} = dto;
+        const { problemId, exampleInput, exampleOutput } = dto;
         const sqlQueryInsert = 'INSERT INTO bsmoj.problem_example_set (id, problem_id, example_input, example_output) ';
         const sqlQueryValues = 'VALUES(?,?,?,?)';
         const sqlQuery = sqlQueryInsert + sqlQueryValues;
@@ -97,7 +98,7 @@ export class ProblemService {
     }
 
     async UploadProblemAnswer(dto: UploadAnswerDTO) {
-        const {problemId, answerInput, answerOutput} = dto;
+        const { problemId, answerInput, answerOutput } = dto;
         const sqlQueryInsert = 'INSERT INTO bsmoj.problem_answer_set (id, problem_id, answer_input, answer_output) ';
         const sqlQueryValues = 'VALUES(?,?,?,?)';
         const sqlQuery = sqlQueryInsert + sqlQueryValues;
@@ -106,5 +107,4 @@ export class ProblemService {
             if (error) throw new UnprocessableEntityException();
         });
     }
-
 }

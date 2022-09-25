@@ -8,15 +8,15 @@ import { AuthService } from './auth/auth.service';
 import { JwtModule } from '@nestjs/jwt';
 
 @Module({
-  imports: [
-    ProblemModule, 
-    UserModule, 
-    ContestModule, 
-    CodeModule, 
-    AuthModule,
-    JwtModule
-  ],
-  controllers: [],
-  providers: [AuthService],
+    imports: [
+        ProblemModule,
+        UserModule,
+        ContestModule,
+        CodeModule,
+        AuthModule,
+        JwtModule
+    ],
+    controllers: [],
+    providers: [AuthService],
 })
-export class AppModule {}
+export class AppModule { }

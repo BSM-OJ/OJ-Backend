@@ -1,4 +1,6 @@
-import { Controller, Get, Body, Post, Inject, UseGuards } from '@nestjs/common';
+import { Controller, Get, Body, Post, Inject, UseGuards, Param } from '@nestjs/common';
+import { User } from 'src/auth/auth.model';
+import { GetUser } from 'src/auth/getUser.decorator';
 import { JwtAuthGuard } from 'src/auth/jwt/jwt.guard';
 import { CodeService } from './code.service';
 import { ComplieResultDTO } from './dto/compile-result.dto';
@@ -14,5 +16,8 @@ export class CodeController {
         return await this.codeService.complie(dto);
     }
 
-    // @Post('submit/:ProblemId')
+//     @Post('solved/:problemId')
+//     solved_problem(@GetUser() user: User, @Param('problemId') problemId: number) {
+//         return this.codeService.solved(user, problemId);
+//     }
 }
