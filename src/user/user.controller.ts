@@ -27,4 +27,6 @@ export class UserController {
     getUserInfo(@GetUser() user: User) {
         return user;
     }
+
+    
 }

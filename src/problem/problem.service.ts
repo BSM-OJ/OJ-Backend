@@ -7,6 +7,9 @@ import { UploadProblemDTO } from './dto/request/upload-problem.dto';
 import { ViewProblemInfoDTO } from './dto/request/view-problem-info.dto';
 import { v4 as uuid } from 'uuid';
 import { User } from 'src/auth/auth.model';
+import { plainToClass } from 'class-transformer';
+import { ProblemInfoDTO } from './dto/problem-info.dto';
+import { ProblemExampleDTO } from './dto/problem-examples.dto';
 
 @Injectable()
 export class ProblemService {
@@ -64,7 +67,23 @@ export class ProblemService {
             if (error) throw new UnprocessableEntityException();
         });
         if (this.ArrayIsEmpty(problemInfo)) throw new NotFoundException('문제를 찾을 수 없습니다.');
-        return problemInfo;
+        const problemInfoWithExamples: ProblemInfoDTO = plainToClass(ProblemInfoDTO, {
+            ...problemInfo[0],
+            problem_examples: (await this.ViewProblemExamples(ProblemId))
+        }, {excludeExtraneousValues: true});
+        return problemInfoWithExamples;
+    }
+
+    async ViewProblemExamples(problemId: number) {
+        const sqlQuerySelect = 'SELECT example_input, example_output FROM bsmoj.problem_example_set ';
+        const sqlQueryWhere = 'WHERE problem_id = ?'
+        const sqlQuery = sqlQuerySelect + sqlQueryWhere;
+        const params = [problemId];
+        const problemExamples = await this.conn.query(sqlQuery, params, (error: string) => {
+            if (error) throw new UnprocessableEntityException();
+        });
+        const problemExampleDtos: ProblemExampleDTO[] = [...problemExamples];
+        return problemExampleDtos;
     }
 
     async DeleteProblem(dto: DeleteProblemDTO) {
