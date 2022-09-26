@@ -5,6 +5,9 @@ import { CreateUserDTO } from './dto/create-user.dto';
 import { AuthService } from 'src/auth/auth.service';
 import { Response } from 'express';
 import { LoginDTO } from './dto/login.dto';
+import { User } from 'src/auth/auth.model';
+import { plainToClass } from 'class-transformer';
+import { ViewSolvedProblemDTO } from './dto/view-solved-problem.dto';
 
 @Injectable()
 export class UserService {
@@ -61,5 +64,32 @@ export class UserService {
         if (!isPasswordMatching) {
             throw new NotFoundException("패스워드가 맞지 않습니다.");
         }
+    }
+
+    async ViewSolvedProblems(user: User) {
+        const { id } = user;
+        const sqlQuerySelect = 'SELECT problem_id FROM bsmoj.solved_problems ';
+		const sqlQueryWhere = 'WHERE user_id = ? ';
+        const sqlQuery = sqlQuerySelect + sqlQueryWhere;
+        const params = [id];
+        const solvedProblems = await this.conn.query(sqlQuery, params, (error: string) => {
+            if (error) throw new UnprocessableEntityException();
+        });
+        const viewSolvedProblemDto: ViewSolvedProblemDTO = plainToClass(ViewSolvedProblemDTO, {
+            numberProblemsSolved: await this.GetNumberProblemsSolved(id),
+            solvedProblem: [...solvedProblems]             
+        })
+        return viewSolvedProblemDto;
+    }
+
+    private async GetNumberProblemsSolved(userId: number) {
+        const sqlQuerySelect = 'SELECT COUNT(*) AS count FROM bsmoj.solved_problems ';
+		const sqlQueryWhere = 'WHERE user_id = ? ';
+        const sqlQuery = sqlQuerySelect + sqlQueryWhere;
+        const params = [userId];
+        const numberProblemsSolved = await this.conn.query(sqlQuery, params, (error: string) => {
+            if (error) throw new UnprocessableEntityException();
+        });
+        return parseInt(numberProblemsSolved[0]['count']);
     }
 }

@@ -3,5 +3,5 @@ using namespace std;
 int main() {
     string a;
     cin>>a;
-    cout<<1;
+    cout<<a;
 }

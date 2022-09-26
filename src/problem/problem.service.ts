@@ -74,6 +74,17 @@ export class ProblemService {
         return problemInfoWithExamples;
     }
 
+    private async VaildateProblem(problemId: number) {
+        const sqlQuerySelect = 'SELECT * FROM bsmoj.problem ';
+        const sqlQueryWhere = 'WHERE id = ?';
+        const sqlQuery = sqlQuerySelect + sqlQueryWhere;
+        const params = [problemId];
+        const problemInfo = await this.conn.query(sqlQuery, params, (error: string) => {
+            if (error) throw new UnprocessableEntityException();
+        });
+        if (this.ArrayIsEmpty(problemInfo)) throw new NotFoundException('문제를 찾을 수 없습니다.');
+    }
+
     async ViewProblemExamples(problemId: number) {
         const sqlQuerySelect = 'SELECT example_input, example_output FROM bsmoj.problem_example_set ';
         const sqlQueryWhere = 'WHERE problem_id = ?'
@@ -88,7 +99,7 @@ export class ProblemService {
 
     async DeleteProblem(dto: DeleteProblemDTO) {
         const { ProblemId } = dto;
-        await this.ViewProblemInfo(dto);
+        await this.VaildateProblem(ProblemId);
         const sqlQueryDelete = 'DELETE FROM bsmoj.problem ';
         const sqlQueryWhere = 'WHERE id = ?';
         const sqlQuery = sqlQueryDelete + sqlQueryWhere;
@@ -107,6 +118,7 @@ export class ProblemService {
 
     async UploadProblemExample(dto: UploadExampleDTO) {
         const { problemId, exampleInput, exampleOutput } = dto;
+        await this.VaildateProblem(problemId);
         const sqlQueryInsert = 'INSERT INTO bsmoj.problem_example_set (id, problem_id, example_input, example_output) ';
         const sqlQueryValues = 'VALUES(?,?,?,?)';
         const sqlQuery = sqlQueryInsert + sqlQueryValues;
@@ -118,6 +130,7 @@ export class ProblemService {
 
     async UploadProblemAnswer(dto: UploadAnswerDTO) {
         const { problemId, answerInput, answerOutput } = dto;
+        await this.VaildateProblem(problemId);
         const sqlQueryInsert = 'INSERT INTO bsmoj.problem_answer_set (id, problem_id, answer_input, answer_output) ';
         const sqlQueryValues = 'VALUES(?,?,?,?)';
         const sqlQuery = sqlQueryInsert + sqlQueryValues;

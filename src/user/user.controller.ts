@@ -28,5 +28,10 @@ export class UserController {
         return user;
     }
 
+    @UseGuards(JwtAuthGuard)
+    @Get('problems')
+    viewSolvedProblems(@GetUser() user: User) {
+        return this.userservice.ViewSolvedProblems(user);
+    }
     
 }
