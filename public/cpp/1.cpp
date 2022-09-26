@@ -1,7 +1,7 @@
 #include <iostream>
 using namespace std;
-string a;
 int main() {
+    string a;
     cin>>a;
-    cout<<a;
+    cout<<1;
 }
