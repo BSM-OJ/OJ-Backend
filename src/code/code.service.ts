@@ -21,57 +21,41 @@ export class CodeService {
 	async complie(dto: RunDTO): Promise<ComplieResultDTO> {
 		const { type, code, stdin } = dto;
 
-		fs.writeFile(`public/${type}/1.${type}`, code, () => null);
-
-		let stderr: string = '';
-		let stdout: string = '';
-		let runTime: number;
-		let memoryUsage: number;
-
-		const startTime: number = performance.now();
-		const resultPromise = this.RunFile(type, stdin);
-		// Todo :: Then 리팩토링
-		resultPromise
-			.then(result => {
-				const endTime = performance.now();
-				if (result.stderr !== '') {
-					stderr += result.stderr;
-					runTime = (startTime - endTime);
-					memoryUsage = result.memoryUsage;
-				}
-				else {
-					stdout += result.stdout //result object
-					runTime = (endTime - startTime);
-					memoryUsage = result.memoryUsage;
-				}
-			})
-			.catch(err => {
-				console.log(err);
-			});
+		const startTime = performance.now();
+		const result = await this.RunCode(type, code, stdin);
+		const endTime = performance.now();
 
 		const complieResult: ComplieResultDTO = plainToClass(ComplieResultDTO,
 		{
-			stderr: stderr,
-			stdout: stdout,
-			runTime: runTime,
-			memoryUsage: memoryUsage
-		});
+			...result,
+			runTime: (endTime - startTime)
+		}, {excludeExtraneousValues: true});
 
 		return complieResult;
 	}
 
-	private async RunFile(type: string, stdin: string) {
+	private async RunCode(type: string, code: string, stdin: string) {
 		switch (type) {
 			case "cpp":
-				return cpp.runFile(`public/${type}/1.${type}`, { stdin: stdin });
+				return cpp.runSource(code, { stdin: stdin }, (err, result) => {
+					return result; 
+				});
 			case "c":
-				return c.runFile(`public/${type}/1.${type}`, { stdin: stdin });
+				return c.runSource(code, { stdin: stdin }, (err, result) => {
+					return result; 
+				});
 			case "node":
-				return node.runFile(`public/${type}/1.${type}`, { stdin: stdin });
+				return node.runSource(code, { stdin: stdin }, (err, result) => {
+					return result; 
+				});
 			case "py":
-				return python.runFile(`public/${type}/1.${type}`, { stdin: stdin });
+				return python.runSource(code, { stdin: stdin }, (err, result) => {
+					return result; 
+				});
 			case "java":
-				return java.runFile(`public/${type}/1.${type}`, { stdin: stdin });
+				return java.runSource(code, { stdin: stdin }, (err, result) => {
+					return result; 
+				});
 		}
 	}
 
@@ -133,6 +117,7 @@ export class CodeService {
 
 		// Todo:: 시간초과 처리
 		// Todo:: 메모리 처리
+		// Todo:: \n 끝에 있어도 정답입니다 처리
 
 		for (let i = 0; i < testcases.length; i++) {
 			const testcase = testcases[i];

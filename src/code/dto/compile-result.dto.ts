@@ -6,10 +6,14 @@ export class ComplieResultDTO {
 
     @Expose()
     stdout: string;
+    
+    @Expose()
+    errorType: string;
 
     @Expose()
     runTime: number;
 
     @Expose()
     memoryUsage: number;
+
 }
