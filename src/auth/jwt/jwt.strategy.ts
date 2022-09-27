@@ -10,6 +10,7 @@ const { SECRET_KEY } = process.env;
 
 @Injectable()
 export class JwtStrategy extends PassportStrategy(Strategy) {
+    
     constructor(@Inject(MD_CONNECTION) private connection: any,
         private jwtService: JwtService) {
         super({

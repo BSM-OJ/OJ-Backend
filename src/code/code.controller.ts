@@ -19,11 +19,6 @@ export class CodeController {
         return await this.codeService.complie(dto);
     }
 
-//     @Post('solved/:problemId')
-//     solved_problem(@GetUser() user: User, @Param('problemId') problemId: number) {
-//         return this.codeService.solved(user, problemId);
-//     }
-
 
     @Post('submit')
     async submit(@GetUser() user: User, @Body() dto: SubmitDTO): Promise<WrongAnswerDTO | RightAnswerDTO> {

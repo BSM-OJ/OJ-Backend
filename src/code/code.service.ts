@@ -10,6 +10,7 @@ import { User } from 'src/auth/auth.model';
 import { SubmitDTO } from './dto/request/submit.dto';
 import { WrongAnswerDTO } from './dto/wrong-answer.dto';
 import { RightAnswerDTO } from './dto/right-answer.dto';
+import { performance } from 'perf_hooks';
 
 @Injectable()
 export class CodeService {
@@ -27,10 +28,10 @@ export class CodeService {
 		let runTime: number;
 		let memoryUsage: number;
 
-		const resultPromise = this.RunFile(type, stdin);
 		const startTime: number = performance.now();
+		const resultPromise = this.RunFile(type, stdin);
 		// Todo :: Then 리팩토링
-		await resultPromise
+		resultPromise
 			.then(result => {
 				const endTime = performance.now();
 				if (result.stderr !== '') {
@@ -49,12 +50,12 @@ export class CodeService {
 			});
 
 		const complieResult: ComplieResultDTO = plainToClass(ComplieResultDTO,
-			{
-				stderr: stderr,
-				stdout: stdout,
-				runTime: runTime,
-				memoryUsage: memoryUsage
-			});
+		{
+			stderr: stderr,
+			stdout: stdout,
+			runTime: runTime,
+			memoryUsage: memoryUsage
+		});
 
 		return complieResult;
 	}
