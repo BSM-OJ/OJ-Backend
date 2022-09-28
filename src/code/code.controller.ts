@@ -12,7 +12,7 @@ import { WrongAnswerDTO } from './dto/wrong-answer.dto';
 @UseGuards(JwtAuthGuard)
 @Controller('code')
 export class CodeController {
-    constructor(private readonly codeService: CodeService) {}
+    constructor(private readonly codeService: CodeService) { }
 
     @Post('complie')
     async Code(@Body() dto: RunDTO): Promise<ComplieResultDTO> {

@@ -108,16 +108,13 @@ export class CodeService {
 		const sqlQueryWhere = 'WHERE problem_id = ? ';
 		const sqlQuery = sqlQuerySelect + sqlQueryWhere;
 		const params = [problemId];
-
 		const testcases = await this.conn.query(sqlQuery, params, (error: string) => {
 			if (error) throw new UnprocessableEntityException();
 		});
-
 		if (this.ArrayIsEmpty(testcases)) throw new NotFoundException("문제에 대한 테스트 케이스를 찾을 수 없습니다.");
 
 		// Todo:: 시간초과 처리
 		// Todo:: 메모리 처리
-		// Todo:: \n 끝에 있어도 정답입니다 처리
 
 		for (let i = 0; i < testcases.length; i++) {
 			const testcase = testcases[i];
@@ -127,12 +124,13 @@ export class CodeService {
 				stdin: testcase.answer_input
 			}
 			const result = await this.complie(rundto)
-			if (result.stdout !== testcase.answer_output) {
+			const adjustedStdout = this.adjustString(result.stdout);
+			if (adjustedStdout !== testcase.answer_output) {
 				const wrongAnswer: WrongAnswerDTO = plainToClass(WrongAnswerDTO, {
 					message: "오답입니다.",
 					testcaseNumber: i + 1,
 					stderr: result.stderr,
-					stdout: result.stdout
+					stdout: adjustedStdout
 				});
 				return wrongAnswer;
 			}
@@ -143,5 +141,17 @@ export class CodeService {
 			message: "정답입니다.",
 		});
 		return rightAnswer;
+	}
+
+	adjustString(result: string) {
+		let adjustedString = result.replace('\r', '');
+		// 끝에 \n 여부
+		const length = adjustedString.length;
+		if (adjustedString.substring(length-1, length) === '\n') {
+			adjustedString = adjustedString.substring(0, length-1);	
+		}
+		// \r 삭제
+		adjustedString = adjustedString.replace('\r', '')
+		return adjustedString;
 	}
 }
