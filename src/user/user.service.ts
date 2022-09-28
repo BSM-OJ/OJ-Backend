@@ -92,4 +92,15 @@ export class UserService {
         });
         return parseInt(numberProblemsSolved[0]['count']);
     }
+
+    async UpdateSolvedProblemNumber(userId: number) {
+        const sqlQueryUpdate = 'UPDATE bsmoj.users ';
+        const sqlQuerySet = 'SET problem_solved = ? ';
+        const sqlQueryWhere = 'WHERE id = ?';
+        const sqlQuery = sqlQueryUpdate + sqlQuerySet + sqlQueryWhere;
+        const params = [await this.GetNumberProblemsSolved(userId), userId];
+        await this.conn.query(sqlQuery, params, (error: string) => {
+            if (error) throw new UnprocessableEntityException();
+        });
+    }
 }

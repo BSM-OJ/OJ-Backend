@@ -15,13 +15,13 @@ export class CodeController {
     constructor(private readonly codeService: CodeService) { }
 
     @Post('complie')
-    async Code(@Body() dto: RunDTO): Promise<ComplieResultDTO> {
-        return await this.codeService.complie(dto);
+    async code(@Body() dto: RunDTO): Promise<ComplieResultDTO> {
+        return await this.codeService.Complie(dto);
     }
 
 
     @Post('submit')
     async submit(@GetUser() user: User, @Body() dto: SubmitDTO): Promise<WrongAnswerDTO | RightAnswerDTO> {
-        return this.codeService.submit(user, dto);
+        return this.codeService.Submit(user, dto);
     }
 }

@@ -11,14 +11,16 @@ import { SubmitDTO } from './dto/request/submit.dto';
 import { WrongAnswerDTO } from './dto/wrong-answer.dto';
 import { RightAnswerDTO } from './dto/right-answer.dto';
 import { performance } from 'perf_hooks';
+import { UserService } from 'src/user/user.service';
 
 @Injectable()
 export class CodeService {
 
-	constructor(@Inject(MD_CONNECTION) private connection: any) { }
+	constructor(@Inject(MD_CONNECTION) private connection: any,
+		private userservice: UserService) { }
 	private conn = this.connection.pool;
 
-	async complie(dto: RunDTO): Promise<ComplieResultDTO> {
+	async Complie(dto: RunDTO): Promise<ComplieResultDTO> {
 		const { type, code, stdin } = dto;
 
 		const startTime = performance.now();
@@ -89,7 +91,7 @@ export class CodeService {
 		return array.length == 0;
 	}
 
-	private async solved(user: User, problemId: number) {
+	private async Solved(user: User, problemId: number) {
 		const { id } = user;
 		await this.ValidateProblem(problemId);
 		if (await this.alreadySolved(id, problemId)) return;
@@ -97,12 +99,15 @@ export class CodeService {
 		const sqlQueryValues = 'VALUES(?,?,?)';
 		const sqlQuery = sqlQueryInsert + sqlQueryValues;
 		const params = [uuid(), id, problemId];
+		
 		await this.conn.query(sqlQuery, params, (error: string) => {
 			if (error) throw new UnprocessableEntityException();
 		});
+		
+		await this.userservice.UpdateSolvedProblemNumber(id);
 	}
 
-	async submit(user: User, dto: SubmitDTO) {
+	async Submit(user: User, dto: SubmitDTO) {
 		const { problemId } = dto;
 		const sqlQuerySelect = 'SELECT answer_input, answer_output FROM bsmoj.problem_answer_set ';
 		const sqlQueryWhere = 'WHERE problem_id = ? ';
@@ -123,8 +128,8 @@ export class CodeService {
 				code: dto.code,
 				stdin: testcase.answer_input
 			}
-			const result = await this.complie(rundto)
-			const adjustedStdout = this.adjustString(result.stdout);
+			const result = await this.Complie(rundto)
+			const adjustedStdout = this.AdjustString(result.stdout);
 			if (adjustedStdout !== testcase.answer_output) {
 				const wrongAnswer: WrongAnswerDTO = plainToClass(WrongAnswerDTO, {
 					message: "오답입니다.",
@@ -136,14 +141,14 @@ export class CodeService {
 			}
 		}
 
-		await this.solved(user, problemId);
+		await this.Solved(user, problemId);
 		const rightAnswer: RightAnswerDTO = plainToClass(RightAnswerDTO, {
 			message: "정답입니다.",
 		});
 		return rightAnswer;
 	}
 
-	adjustString(result: string) {
+	private AdjustString(result: string) {
 		let adjustedString = result.replace('\r', '');
 		// 끝에 \n 여부
 		const length = adjustedString.length;
