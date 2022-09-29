@@ -19,7 +19,6 @@ export class CodeController {
         return await this.codeService.Complie(dto);
     }
 
-
     @Post('submit')
     async submit(@GetUser() user: User, @Body() dto: SubmitDTO): Promise<WrongAnswerDTO | RightAnswerDTO> {
         return this.codeService.Submit(user, dto);
