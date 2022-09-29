@@ -12,6 +12,7 @@ import { RightAnswerDTO } from './dto/right-answer.dto';
 import { performance } from 'perf_hooks';
 import { UserService } from 'src/user/user.service';
 
+
 @Injectable()
 export class CodeService {
 
@@ -30,7 +31,8 @@ export class CodeService {
 		const complieResult: ComplieResultDTO = plainToClass(ComplieResultDTO,
 			{
 				...result,
-				stdout: this.AdjustString(result.stdout),
+				stdout: this.AdjustStdout(result.stdout),
+				stderr: this.AdjustStderr(result.stderr),
 				// byte to megabyte
 				memoryUsage: result.memoryUsage / 125000,
 				runTime: (endTime - startTime)
@@ -39,7 +41,7 @@ export class CodeService {
 		return complieResult;
 	}
 
-	// Todo: java, node 돌아가는지 확인
+	// Todo: java 돌아가는지 확인
 	private async RunCode(type: string, code: string, stdin: string, timeLimit?: number) {
 		switch (type) {
 			case "cpp":
@@ -55,7 +57,9 @@ export class CodeService {
 					return result;
 				});
 			case "py":
-				return python.runSource(code, { stdin: stdin, timeout: timeLimit ?? this.DEFAULT_TIMELIMIT, compileTimeout: timeLimit ?? this.DEFAULT_TIMELIMIT }, (err, result) => {
+				const utf8EncodingSetting = 
+				"import sys\nimport io\nsys.stdout = io.TextIOWrapper(sys.stdout.detach(), encoding = 'utf-8')\nsys.stderr = io.TextIOWrapper(sys.stderr.detach(), encoding = 'utf-8')\n"
+				return python.runSource(utf8EncodingSetting + code, { stdin: stdin, timeout: timeLimit ?? this.DEFAULT_TIMELIMIT, compileTimeout: timeLimit ?? this.DEFAULT_TIMELIMIT }, (err, result) => {
 					return result;
 				});
 			case "java":
@@ -196,14 +200,19 @@ export class CodeService {
 		};
 	}
 
-	private AdjustString(result: string) {
+	private AdjustStdout(stdout: string) {
 		// \r 삭제
-		let adjustedString = result.replace(/\r/g, '');
+		let adjustedStdout = stdout.replace(/\r/g, '');
 		// 끝에 \n 여부
-		const length = adjustedString.length;
-		if (adjustedString.substring(length - 1, length) === '\n') {
-			adjustedString = adjustedString.substring(0, length - 1);
+		const length = adjustedStdout.length;
+		if (adjustedStdout.substring(length - 1, length) === '\n') {
+			adjustedStdout = adjustedStdout.substring(0, length - 1);
 		}
-		return adjustedString;
+		return adjustedStdout;
+	}
+
+	private AdjustStderr(stderr: string) {
+		const adjustedStderr = stderr.split('\\').slice(-1)[0];
+		return adjustedStderr;
 	}
 }

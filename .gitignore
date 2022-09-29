@@ -1,6 +1,8 @@
 # compiled output
 /dist
-/node_modules
+/node_modules/**
+!compile-run\dist\lib\execute-command.js
+
 /.env
 
 # Logs
