@@ -1,10 +1,12 @@
-import { IsNumber, IsString } from "class-validator";
+import { IsDate, isDate, IsNumber, IsString } from "class-validator";
 
 export class CreateContestDTO {
     @IsString()
-    start_date: string;
-    @IsNumber()
-    time: number;
+    name: string;
+    @IsDate()
+    start_date: Date;
+    @IsDate()
+    end_date: Date;
     @IsString()
     password: string;
 }

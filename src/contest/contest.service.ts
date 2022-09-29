@@ -5,13 +5,41 @@ import { CreateContestDTO } from './dto/create-contest.dto';
 export class ContestService {
     constructor(@Inject(MD_CONNECTION) private connection: any) {}
     private conn = this.connection.pool;
-    async CreateContest(dto: CreateContestDTO) {
-        const { start_date, time, password} = dto;
-        const sqlQuery = 'INSERT INTO bsmoj.contest (start_date, time, password) VALUES(?, ?, ?)';
-        const params = [start_date, time, password];
+    async getId() {
+        const sqlQuery = 'select id from bsmoj.contest order by id desc limit 1';
+        return this.conn.query(sqlQuery, (error: string) => {
+            if (error) throw new UnprocessableEntityException();
+        });
+    }
+    async createContest(dto: CreateContestDTO) {
+        const { start_date, end_date, password, name} = dto;
+        const sqlQuery = 'INSERT INTO bsmoj.contest (start_date, end_date, password, name) VALUES(?, ?, ?, ?)';
+        const params = [start_date, end_date, password, name];
         await this.conn.query(sqlQuery, params, (error: string) => {
             if (error) throw new UnprocessableEntityException();
         });
-        return "대회 생성이 완료되었스빈다."
+        const id = await this.getId();
+        return id;
+    }
+    async getBeforeContests() {
+        const beforeQuery = 'select id, name from bsmoj.contest where start_date > CURDATE()';
+        const before = await this.conn.query(beforeQuery, (error: string) => {
+            if (error) throw new UnprocessableEntityException();
+        });
+        return before;
+    }
+    async getStartingContests() {
+        const startingQuery = 'select id, name from bsmoj.contest where end_date >= CURDATE() and start_date <= CURDATE()';
+        const starting = await this.conn.query(startingQuery, (error: string) => {
+            if (error) throw new UnprocessableEntityException();
+        });
+        return starting;
+    }
+    async getEndedContests() {
+        const endedQuery = 'select id, name from bsmoj.contest where end_date < CURDATE()';
+        const ended = await this.conn.query(endedQuery, (error: string) => {
+            if (error) throw new UnprocessableEntityException();
+        });
+        return ended;
     }
 }
