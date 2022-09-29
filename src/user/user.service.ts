@@ -31,11 +31,14 @@ export class UserService {
 
     async createUser(dto: CreateUserDTO): Promise<void> {
         const { nickname, email, password } = dto;
-        const sqlQuery = 'INSERT INTO bsmoj.users (email,nickname,submissions,problem_solved,password) VALUES(?,?,0,0,?)';
+        const sqlQuery = `INSERT INTO bsmoj.users
+        (email, nickname, submissions, accepted, wrong_answer, compilation_error, time_limit_exceeded, memory_limit_exceeded, password)
+        VALUES(?, ?, 0, 0, 0, 0, 0, 0, ?)`;
         const params = [email, nickname, password];
         await this.conn.query(sqlQuery, params, (error: string) => {
             if (error) throw new UnprocessableEntityException();
         });
+
     }
 
     async login(res: Response, dto: LoginDTO) {
@@ -68,6 +71,7 @@ export class UserService {
 
     async ViewSolvedProblems(user: User) {
         const { id } = user;
+        console.log(id);
         const sqlQuerySelect = 'SELECT problem_id FROM bsmoj.solved_problems ';
 		const sqlQueryWhere = 'WHERE user_id = ? ';
         const sqlQuery = sqlQuerySelect + sqlQueryWhere;
@@ -95,10 +99,65 @@ export class UserService {
 
     async UpdateSolvedProblemNumber(userId: number) {
         const sqlQueryUpdate = 'UPDATE bsmoj.users ';
-        const sqlQuerySet = 'SET problem_solved = ? ';
+        const sqlQuerySet = 'SET accepted = ? ';
         const sqlQueryWhere = 'WHERE id = ?';
         const sqlQuery = sqlQueryUpdate + sqlQuerySet + sqlQueryWhere;
         const params = [await this.GetNumberProblemsSolved(userId), userId];
+        await this.conn.query(sqlQuery, params, (error: string) => {
+            if (error) throw new UnprocessableEntityException();
+        });
+    }
+
+    async UpdateSubmissionsNumber(user: User) {
+        const sqlQueryUpdate = 'UPDATE bsmoj.users ';
+        const sqlQuerySet = 'SET submissions = ? ';
+        const sqlQueryWhere = 'WHERE id = ?';
+        const sqlQuery = sqlQueryUpdate + sqlQuerySet + sqlQueryWhere;
+        const params = [user.submissions + 1, user.id];
+        await this.conn.query(sqlQuery, params, (error: string) => {
+            if (error) throw new UnprocessableEntityException();
+        });
+    }
+
+    async UpdateWrongAnswerNumber(user: User) {
+        const sqlQueryUpdate = 'UPDATE bsmoj.users ';
+        const sqlQuerySet = 'SET wrong_answer = ? ';
+        const sqlQueryWhere = 'WHERE id = ?';
+        const sqlQuery = sqlQueryUpdate + sqlQuerySet + sqlQueryWhere;
+        const params = [user.wrong_answer + 1, user.id];
+        await this.conn.query(sqlQuery, params, (error: string) => {
+            if (error) throw new UnprocessableEntityException();
+        });
+    }
+
+    async UpdateCompilationErrorNumber(user: User) {
+        const sqlQueryUpdate = 'UPDATE bsmoj.users ';
+        const sqlQuerySet = 'SET compilation_error = ? ';
+        const sqlQueryWhere = 'WHERE id = ?';
+        const sqlQuery = sqlQueryUpdate + sqlQuerySet + sqlQueryWhere;
+        const params = [user.compilation_error + 1, user.id];
+        await this.conn.query(sqlQuery, params, (error: string) => {
+            if (error) throw new UnprocessableEntityException();
+        });
+    }
+
+    async UpdateTLENumber(user: User) {
+        const sqlQueryUpdate = 'UPDATE bsmoj.users ';
+        const sqlQuerySet = 'SET time_limit_exceeded = ? ';
+        const sqlQueryWhere = 'WHERE id = ?';
+        const sqlQuery = sqlQueryUpdate + sqlQuerySet + sqlQueryWhere;
+        const params = [user.time_limit_exceeded + 1, user.id];
+        await this.conn.query(sqlQuery, params, (error: string) => {
+            if (error) throw new UnprocessableEntityException();
+        });
+    }
+
+    async UpdateMLENumber(user: User) {
+        const sqlQueryUpdate = 'UPDATE bsmoj.users ';
+        const sqlQuerySet = 'SET memory_limit_exceeded = ? ';
+        const sqlQueryWhere = 'WHERE id = ?';
+        const sqlQuery = sqlQueryUpdate + sqlQuerySet + sqlQueryWhere;
+        const params = [user.memory_limit_exceeded + 1, user.id];
         await this.conn.query(sqlQuery, params, (error: string) => {
             if (error) throw new UnprocessableEntityException();
         });

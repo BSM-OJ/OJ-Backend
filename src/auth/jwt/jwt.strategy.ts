@@ -37,8 +37,8 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
     }
 
     private async findByEmail(email: string) {
-        const sqlQuerySelect = 'SELECT u.id, u.email, u.nickname, u.submissions, u.problem_solved ';
-        const sqlQueryFrom = 'FROM bsmoj.users u WHERE email = ?'
+        const sqlQuerySelect = 'SELECT id, email, nickname, submissions, accepted, wrong_answer, compilation_error, time_limit_exceeded, memory_limit_exceeded ';
+        const sqlQueryFrom = 'FROM bsmoj.users WHERE email = ?'
         const sqlQuery = sqlQuerySelect + sqlQueryFrom;
         const params = [email];
         const user = await this.conn.query(sqlQuery, params, (error: string) => {

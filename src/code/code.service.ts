@@ -43,23 +43,23 @@ export class CodeService {
 	private async RunCode(type: string, code: string, stdin: string, timeLimit?: number) {
 		switch (type) {
 			case "cpp":
-				return cpp.runSource(code, { stdin: stdin, timeout: timeLimit??this.DEFAULT_TIMELIMIT, compileTimeout: timeLimit??this.DEFAULT_TIMELIMIT }, (err, result) => {
+				return cpp.runSource(code, { stdin: stdin, timeout: timeLimit ?? this.DEFAULT_TIMELIMIT, compileTimeout: timeLimit ?? this.DEFAULT_TIMELIMIT }, (err, result) => {
 					return result;
 				});
 			case "c":
-				return c.runSource(code, { stdin: stdin, timeout: timeLimit??this.DEFAULT_TIMELIMIT, compileTimeout: timeLimit??this.DEFAULT_TIMELIMIT }, (err, result) => {
+				return c.runSource(code, { stdin: stdin, timeout: timeLimit ?? this.DEFAULT_TIMELIMIT, compileTimeout: timeLimit ?? this.DEFAULT_TIMELIMIT }, (err, result) => {
 					return result;
 				});
 			case "node":
-				return node.runSource(code, { stdin: stdin, timeout: timeLimit??this.DEFAULT_TIMELIMIT, compileTimeout: timeLimit??this.DEFAULT_TIMELIMIT }, (err, result) => {
+				return node.runSource(code, { stdin: stdin, timeout: timeLimit ?? this.DEFAULT_TIMELIMIT, compileTimeout: timeLimit ?? this.DEFAULT_TIMELIMIT }, (err, result) => {
 					return result;
 				});
 			case "py":
-				return python.runSource(code, { stdin: stdin, timeout: timeLimit??this.DEFAULT_TIMELIMIT, compileTimeout: timeLimit??this.DEFAULT_TIMELIMIT }, (err, result) => {
+				return python.runSource(code, { stdin: stdin, timeout: timeLimit ?? this.DEFAULT_TIMELIMIT, compileTimeout: timeLimit ?? this.DEFAULT_TIMELIMIT }, (err, result) => {
 					return result;
 				});
 			case "java":
-				return java.runSource(code, { stdin: stdin, timeout: timeLimit??this.DEFAULT_TIMELIMIT, compileTimeout: timeLimit??this.DEFAULT_TIMELIMIT }, (err, result) => {
+				return java.runSource(code, { stdin: stdin, timeout: timeLimit ?? this.DEFAULT_TIMELIMIT, compileTimeout: timeLimit ?? this.DEFAULT_TIMELIMIT }, (err, result) => {
 					return result;
 				});
 		}
@@ -87,7 +87,8 @@ export class CodeService {
 			if (error) throw new UnprocessableEntityException();
 		});
 		if (this.ArrayIsEmpty(testcases)) throw new NotFoundException("문제에 대한 테스트 케이스를 찾을 수 없습니다.");
-
+		// 제출 횟수 증가
+		await this.userservice.UpdateSubmissionsNumber(user);
 		const { timeLimit, memoryLimit } = await this.GetProblemTimeLimitAndMemoryLimit(problemId);
 		for (let i = 0; i < testcases.length; i++) {
 			const testcase = testcases[i];
@@ -103,26 +104,30 @@ export class CodeService {
 			// run-timeout : 프로그램 계속 진행 중
 			// run-time : 시간 내에 계산 못끝냄 or 컴파일 에러
 			if (result.errorType === 'run-timeout' || (result.errorType === 'run-time' && !result.stderr)) {
+				await this.userservice.UpdateTLENumber(user);
 				const wrongAnswer: WrongAnswerDTO = plainToClass(WrongAnswerDTO, {
 					message: "시간 초과 입니다.",
 					testcaseNumber: i + 1,
-					stderr: result.stderr??result.errorType,
+					stderr: result.stderr,
 					stdout: result.stdout
 				})
 				return wrongAnswer;
 			}
 			// 메모리 초과
 			if (result.memoryUsage > memoryLimit) {
+				await this.userservice.UpdateMLENumber(user);
 				const wrongAnswer: WrongAnswerDTO = plainToClass(WrongAnswerDTO, {
 					message: "메모리 초과 입니다.",
 					testcaseNumber: i + 1,
-					stderr: result.stderr??result.errorType,
+					stderr: result.stderr,
 					stdout: result.stdout
 				});
 				return wrongAnswer;
 			}
 			// 오답
 			if (result.stdout !== testcase.answer_output) {
+				if (result.stderr) await this.userservice.UpdateCompilationErrorNumber(user);
+				else await this.userservice.UpdateWrongAnswerNumber(user);
 				const wrongAnswer: WrongAnswerDTO = plainToClass(WrongAnswerDTO, {
 					message: "오답입니다.",
 					testcaseNumber: i + 1,
@@ -186,7 +191,7 @@ export class CodeService {
 
 		return {
 			// millisecond to second
-			timeLimit: problem[0].time_limit*1000,
+			timeLimit: problem[0].time_limit * 1000,
 			memoryLimit: problem[0].memory_limit
 		};
 	}

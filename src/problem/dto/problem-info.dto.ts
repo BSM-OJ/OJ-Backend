@@ -15,6 +15,9 @@ export class ProblemInfoDTO {
     content: string;
 
     @Expose()
+    difficulty: string;
+    
+    @Expose()
     sources: string;
 
     @Expose()

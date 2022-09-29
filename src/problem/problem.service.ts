@@ -36,12 +36,12 @@ export class ProblemService {
     }
 
     async UploadProblem(user: User, dto: UploadProblemDTO) {
-        const { title, content, sources, time_limit, memory_limit } = dto;
+        const { title, content, difficulty, sources, time_limit, memory_limit } = dto;
         const { id } = user;
-        const sqlQueryInsert = 'INSERT INTO bsmoj.problem (writer_id, title, content, sources, time_limit, memory_limit) ';
-        const sqlQueryValues = 'VALUES(?,?,?,?,?,?)';
+        const sqlQueryInsert = 'INSERT INTO bsmoj.problem (writer_id, title, content, difficulty, sources, time_limit, memory_limit) ';
+        const sqlQueryValues = 'VALUES(?,?,?,?,?,?,?)';
         const sqlQuery = sqlQueryInsert + sqlQueryValues;
-        const params = [id, title, content, sources, time_limit, memory_limit];
+        const params = [id, title, content, difficulty, sources, time_limit, memory_limit];
         await this.conn.query(sqlQuery, params, (error: string) => {
             if (error) throw new UnprocessableEntityException();
         });

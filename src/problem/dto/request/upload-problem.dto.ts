@@ -1,5 +1,5 @@
 
-import { IsNumber, IsString, MaxLength } from 'class-validator'
+import { IsIn, IsNumber, IsString, MaxLength } from 'class-validator'
 
 export class UploadProblemDTO {
     @IsString()
@@ -9,6 +9,10 @@ export class UploadProblemDTO {
     @IsString()
     @MaxLength(1000)
     content: string;
+
+    @IsNumber()
+    @IsIn([1,2,3,4,5])
+    difficulty: number;
 
     @IsString()
     @MaxLength(100)

@@ -7,7 +7,6 @@ import { CreateUserDTO } from './dto/create-user.dto';
 import { LoginDTO } from './dto/login.dto';
 import { UserService } from './user.service';
 
-// Todo:: 잘못된풀이 시간초과 횟수 유저 저장
 @Controller('user')
 export class UserController {
     constructor(private readonly userservice: UserService) { }
@@ -35,4 +34,5 @@ export class UserController {
         return this.userservice.ViewSolvedProblems(user);
     }
     
+    // todo GetUserInfo
 }
