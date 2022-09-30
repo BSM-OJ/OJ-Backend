@@ -11,6 +11,8 @@ import { WrongAnswerDTO } from './dto/wrong-answer.dto';
 import { RightAnswerDTO } from './dto/right-answer.dto';
 import { performance } from 'perf_hooks';
 import { UserService } from 'src/user/user.service';
+import * as fs from "fs"; 
+
 
 
 @Injectable()
@@ -28,10 +30,12 @@ export class CodeService {
 		const result = await this.RunCode(type, code, stdin, timeLimit);
 		const endTime = performance.now();
 
+		const adjustedStdout = this.AdjustStdout(result.stdout);
+		
 		const complieResult: ComplieResultDTO = plainToClass(ComplieResultDTO,
 			{
 				...result,
-				stdout: this.AdjustStdout(result.stdout),
+				stdout: adjustedStdout,
 				stderr: this.AdjustStderr(result.stderr),
 				// byte to megabyte
 				memoryUsage: result.memoryUsage / 125000,
@@ -63,9 +67,12 @@ export class CodeService {
 					return result;
 				});
 			case "java":
-				return java.runSource(code, { stdin: stdin, timeout: timeLimit ?? this.DEFAULT_TIMELIMIT, compileTimeout: timeLimit ?? this.DEFAULT_TIMELIMIT }, (err, result) => {
+				fs.writeFile('public/java/BOJ.java', code, (err) => {
+					if (err) throw new NotFoundException("java 실행 디렉토리를 찾을 수 없습니다.");
+				})
+				return java.runFile('public/java/BOJ.java', { stdin: stdin, timeout: timeLimit ?? this.DEFAULT_TIMELIMIT, compileTimeout: timeLimit ?? this.DEFAULT_TIMELIMIT }, (err, result) => {
 					return result;
-				});
+				})
 		}
 	}
 
@@ -202,12 +209,12 @@ export class CodeService {
 
 	private AdjustStdout(stdout: string) {
 		// \r 삭제
-		let adjustedStdout = stdout.replace(/\r/g, '');
+		let adjustedStdout = stdout.replace(/\r/g, "");
 		// 끝에 \n 여부
 		const length = adjustedStdout.length;
 		if (adjustedStdout.substring(length - 1, length) === '\n') {
 			adjustedStdout = adjustedStdout.substring(0, length - 1);
-		}
+		}		
 		return adjustedStdout;
 	}
 
