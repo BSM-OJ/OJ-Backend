@@ -45,7 +45,6 @@ export class CodeService {
 		return complieResult;
 	}
 
-	// Todo: java 돌아가는지 확인
 	private async RunCode(type: string, code: string, stdin: string, timeLimit?: number) {
 		switch (type) {
 			case "cpp":

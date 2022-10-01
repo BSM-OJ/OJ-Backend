@@ -1,13 +1,14 @@
 import * as bcrypt from 'bcrypt';
 import { Inject, Injectable, UnauthorizedException, UnprocessableEntityException, NotFoundException } from '@nestjs/common';
 import { MD_CONNECTION } from 'database/database.module';
-import { CreateUserDTO } from './dto/create-user.dto';
+import { CreateUserDTO } from './dto/request/create-user.dto';
 import { AuthService } from 'src/auth/auth.service';
 import { Response } from 'express';
-import { LoginDTO } from './dto/login.dto';
+import { LoginDTO } from './dto/request/login.dto';
 import { User } from 'src/auth/auth.model';
 import { plainToClass } from 'class-transformer';
 import { ViewSolvedProblemDTO } from './dto/view-solved-problem.dto';
+import { GetUserInfoDTO } from './dto/request/get-user-info.dto';
 
 @Injectable()
 export class UserService {
@@ -161,5 +162,18 @@ export class UserService {
         await this.conn.query(sqlQuery, params, (error: string) => {
             if (error) throw new UnprocessableEntityException();
         });
+    }
+
+    async GetUserInfo(dto: GetUserInfoDTO): Promise<User> {
+        const { userId } = dto;
+        const sqlQuerySelect = 'SELECT id, email, nickname, submissions, accepted, wrong_answer, compilation_error, time_limit_exceeded, memory_limit_exceeded ';
+        const sqlQueryFrom = 'FROM bsmoj.users WHERE id = ?'
+        const sqlQuery = sqlQuerySelect + sqlQueryFrom;
+        const params = [userId];
+        const user = await this.conn.query(sqlQuery, params, (error: string) => {
+            if (error) throw new UnprocessableEntityException();
+        });
+        if (user[0] === undefined) throw new NotFoundException("유저를 찾을 수 없습니다.");
+        return user[0];
     }
 }
