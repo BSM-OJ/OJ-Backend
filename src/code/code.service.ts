@@ -155,7 +155,7 @@ export class CodeService {
 		return rightAnswer;
 	}
 
-	private async alreadySolved(id: number, problemId: number) {
+	private async alreadySolved(id: number, problemId: number): Promise<boolean> {
 		const sqlQuerySelect = 'SELECT * FROM bsmoj.solved_problems ';
 		const sqlQueryWhere = 'WHERE user_id = ? AND problem_id = ?';
 		const sqlQuery = sqlQuerySelect + sqlQueryWhere;
@@ -174,7 +174,7 @@ export class CodeService {
 		return array.length == 0;
 	}
 
-	private async Solved(user: User, problemId: number) {
+	private async Solved(user: User, problemId: number): Promise<void> {
 		const { id } = user;
 		await this.ValidateProblem(problemId);
 		if (await this.alreadySolved(id, problemId)) return;

@@ -97,7 +97,7 @@ export class ProblemService {
         return problemExampleDtos;
     }
 
-    async DeleteProblem(dto: DeleteProblemDTO) {
+    async DeleteProblem(dto: DeleteProblemDTO): Promise<void> {
         const { ProblemId } = dto;
         await this.VaildateProblem(ProblemId);
         const sqlQueryDelete = 'DELETE FROM bsmoj.problem ';
@@ -116,7 +116,7 @@ export class ProblemService {
         return array.length == 0;
     }
 
-    async UploadProblemExample(dto: UploadExampleDTO) {
+    async UploadProblemExample(dto: UploadExampleDTO): Promise<void> {
         const { problemId, exampleInput, exampleOutput } = dto;
         await this.VaildateProblem(problemId);
         const sqlQueryInsert = 'INSERT INTO bsmoj.problem_example_set (id, problem_id, example_input, example_output) ';
@@ -128,7 +128,7 @@ export class ProblemService {
         });
     }
 
-    async UploadProblemAnswer(dto: UploadAnswerDTO) {
+    async UploadProblemAnswer(dto: UploadAnswerDTO): Promise<void> {
         const { problemId, answerInput, answerOutput } = dto;
         await this.VaildateProblem(problemId);
         const sqlQueryInsert = 'INSERT INTO bsmoj.problem_answer_set (id, problem_id, answer_input, answer_output) ';

@@ -37,17 +37,17 @@ export class ProblemController {
 	}
 
 	@Delete(':ProblemId')
-	deleteProblem(@Param() dto: DeleteProblemDTO) {
+	deleteProblem(@Param() dto: DeleteProblemDTO): Promise<void> {
 		return this.problemservice.DeleteProblem(dto);
 	}
 
 	@Post('upload/exampleSet')
-	uploadProblemExample(@Body() dto: UploadExampleDTO) {
+	uploadProblemExample(@Body() dto: UploadExampleDTO): Promise<void> {
 		return this.problemservice.UploadProblemExample(dto);
 	}
 
 	@Post('upload/answerSet')
-	uploadProblemAnswer(@Body() dto: UploadAnswerDTO) {
+	uploadProblemAnswer(@Body() dto: UploadAnswerDTO): Promise<void> {
 		return this.problemservice.UploadProblemAnswer(dto);
 	}
 

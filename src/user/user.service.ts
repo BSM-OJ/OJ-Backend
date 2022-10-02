@@ -9,6 +9,7 @@ import { User } from 'src/auth/auth.model';
 import { plainToClass } from 'class-transformer';
 import { ViewSolvedProblemDTO } from './dto/view-solved-problem.dto';
 import { GetUserInfoDTO } from './dto/request/get-user-info.dto';
+import { Token } from '../auth/token.model';
 
 @Injectable()
 export class UserService {
@@ -42,7 +43,7 @@ export class UserService {
 
     }
 
-    async login(res: Response, dto: LoginDTO) {
+    async login(res: Response, dto: LoginDTO): Promise<Token> {
         const { email, password } = dto;
         const user = await this.findByEmail(email);
         if (user[0] === undefined) throw new UnprocessableEntityException("이메일을 찾을 수 없습니다.");
@@ -70,7 +71,7 @@ export class UserService {
         }
     }
 
-    async ViewSolvedProblems(user: User) {
+    async ViewSolvedProblems(user: User): Promise<ViewSolvedProblemDTO> {
         const { id } = user;
         console.log(id);
         const sqlQuerySelect = 'SELECT problem_id FROM bsmoj.solved_problems ';
@@ -87,7 +88,7 @@ export class UserService {
         return viewSolvedProblemDto;
     }
 
-    private async GetNumberProblemsSolved(userId: number) {
+    private async GetNumberProblemsSolved(userId: number): Promise<number> {
         const sqlQuerySelect = 'SELECT COUNT(*) AS count FROM bsmoj.solved_problems ';
 		const sqlQueryWhere = 'WHERE user_id = ? ';
         const sqlQuery = sqlQuerySelect + sqlQueryWhere;
@@ -98,7 +99,7 @@ export class UserService {
         return parseInt(numberProblemsSolved[0]['count']);
     }
 
-    async UpdateSolvedProblemNumber(userId: number) {
+    async UpdateSolvedProblemNumber(userId: number): Promise<void> {
         const sqlQueryUpdate = 'UPDATE bsmoj.users ';
         const sqlQuerySet = 'SET accepted = ? ';
         const sqlQueryWhere = 'WHERE id = ?';
@@ -109,7 +110,7 @@ export class UserService {
         });
     }
 
-    async UpdateSubmissionsNumber(user: User) {
+    async UpdateSubmissionsNumber(user: User): Promise<void> {
         const sqlQueryUpdate = 'UPDATE bsmoj.users ';
         const sqlQuerySet = 'SET submissions = ? ';
         const sqlQueryWhere = 'WHERE id = ?';
@@ -120,7 +121,7 @@ export class UserService {
         });
     }
 
-    async UpdateWrongAnswerNumber(user: User) {
+    async UpdateWrongAnswerNumber(user: User): Promise<void> {
         const sqlQueryUpdate = 'UPDATE bsmoj.users ';
         const sqlQuerySet = 'SET wrong_answer = ? ';
         const sqlQueryWhere = 'WHERE id = ?';
@@ -131,7 +132,7 @@ export class UserService {
         });
     }
 
-    async UpdateCompilationErrorNumber(user: User) {
+    async UpdateCompilationErrorNumber(user: User): Promise<void> {
         const sqlQueryUpdate = 'UPDATE bsmoj.users ';
         const sqlQuerySet = 'SET compilation_error = ? ';
         const sqlQueryWhere = 'WHERE id = ?';
@@ -142,7 +143,7 @@ export class UserService {
         });
     }
 
-    async UpdateTLENumber(user: User) {
+    async UpdateTLENumber(user: User): Promise<void> {
         const sqlQueryUpdate = 'UPDATE bsmoj.users ';
         const sqlQuerySet = 'SET time_limit_exceeded = ? ';
         const sqlQueryWhere = 'WHERE id = ?';
@@ -153,7 +154,7 @@ export class UserService {
         });
     }
 
-    async UpdateMLENumber(user: User) {
+    async UpdateMLENumber(user: User): Promise<void> {
         const sqlQueryUpdate = 'UPDATE bsmoj.users ';
         const sqlQuerySet = 'SET memory_limit_exceeded = ? ';
         const sqlQueryWhere = 'WHERE id = ?';
