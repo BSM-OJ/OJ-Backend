@@ -2,6 +2,7 @@ import { Controller, Get, Post, UseGuards, Body, Param, Delete } from '@nestjs/c
 import { User } from 'src/auth/auth.model';
 import { GetUser } from 'src/auth/getUser.decorator';
 import { JwtAuthGuard } from 'src/auth/jwt/jwt.guard';
+import { ProblemInfoDTO } from './dto/problem-info.dto';
 import { DeleteProblemDTO } from './dto/request/delete-problem.dto';
 import { UploadAnswerDTO } from './dto/request/upload-answer.dto';
 import { UploadExampleDTO } from './dto/request/upload-example.dto';
@@ -9,6 +10,7 @@ import { UploadProblemDTO } from './dto/request/upload-problem.dto';
 import { ViewProblemInfoDTO } from './dto/request/view-problem-info.dto';
 import { ProblemService } from './problem.service';
 
+// Todo :: 자신이 푼 문제
 @UseGuards(JwtAuthGuard)
 @Controller('problem')
 export class ProblemController {
@@ -25,8 +27,10 @@ export class ProblemController {
 	}
 
 	@Get(':ProblemId')
-	viewProblemInfo(@Param() dto: ViewProblemInfoDTO) {
-		return this.problemservice.ViewProblemInfo(dto);
+	viewProblemInfo(
+		@GetUser() user: User,
+		@Param() dto: ViewProblemInfoDTO): Promise<ProblemInfoDTO> {
+		return this.problemservice.ViewProblemInfo(user, dto);
 	}
 
 	@Post()

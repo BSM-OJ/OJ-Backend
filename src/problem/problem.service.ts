@@ -57,7 +57,7 @@ export class ProblemService {
         return await this.conn.query(sqlQuery);
     }
 
-    async ViewProblemInfo(dto: ViewProblemInfoDTO) {
+    async ViewProblemInfo(user: User, dto: ViewProblemInfoDTO): Promise<ProblemInfoDTO>  {
         const { ProblemId } = dto;
         const sqlQuerySelect = 'SELECT * FROM bsmoj.problem ';
         const sqlQueryWhere = 'WHERE id = ?';
@@ -66,12 +66,24 @@ export class ProblemService {
         const problemInfo = await this.conn.query(sqlQuery, params, (error: string) => {
             if (error) throw new UnprocessableEntityException();
         });
+        
         if (this.ArrayIsEmpty(problemInfo)) throw new NotFoundException('문제를 찾을 수 없습니다.');
         const problemInfoWithExamples: ProblemInfoDTO = plainToClass(ProblemInfoDTO, {
             ...problemInfo[0],
             problem_examples: (await this.ViewProblemExamples(ProblemId))
         }, {excludeExtraneousValues: true});
         return problemInfoWithExamples;
+    }
+
+    private async AlreadySolved(userId: number, problemId: number): Promise<boolean> {
+        const sqlQuerySelect = 'SELECT problem_id FROM bsmoj.solved_problems ';
+		const sqlQueryWhere = 'WHERE user_id = ? and problem_id = ?';
+        const sqlQuery = sqlQuerySelect + sqlQueryWhere;
+        const params = [userId, problemId];
+        const solvedProblems= await this.conn.query(sqlQuery, params, (error: string) => {
+            if (error) throw new UnprocessableEntityException();
+        });
+        return true;
     }
 
     private async VaildateProblem(problemId: number) {
