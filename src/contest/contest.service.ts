@@ -1,6 +1,8 @@
 import { Injectable, Inject, UnprocessableEntityException} from '@nestjs/common';
 import { MD_CONNECTION } from 'database/database.module';
 import { CreateContestDTO } from './dto/create-contest.dto';
+import { CreateProblemDTO } from './dto/create-problem.dto';
+
 @Injectable()
 export class ContestService {
     constructor(@Inject(MD_CONNECTION) private connection: any) {}
@@ -41,5 +43,21 @@ export class ContestService {
             if (error) throw new UnprocessableEntityException();
         });
         return ended;
+    }
+    async getProblemById(id: string) {
+        const query = 'select problem_id from bsmoj.contest_problem where contest_id=' + id;
+        const problems = await this.conn.query(query, (error: string)=>{
+            if(error) throw new UnprocessableEntityException();
+        })
+        return problems;
+    }
+    async createProblemById(dto: CreateProblemDTO) {
+        const {problem_id, contest_id} = dto;
+        const query = 'insert into bsmoj.contest_problem (problem_id, contest_id) values(?,?)';
+        const params = [problem_id, contest_id];
+        await this.conn.query(query, params, (error: string) => {
+            if (error) throw new UnprocessableEntityException();
+        });
+        return true;
     }
 }
