@@ -10,7 +10,6 @@ import { UploadProblemDTO } from './dto/request/upload-problem.dto';
 import { ViewProblemInfoDTO } from './dto/request/view-problem-info.dto';
 import { ProblemService } from './problem.service';
 
-// Todo :: 자신이 푼 문제
 @UseGuards(JwtAuthGuard)
 @Controller('problem')
 export class ProblemController {

@@ -9,3 +9,4 @@ export type User = {
     time_limit_exceeded: number,
     memory_limit_exceeded: number
 }
+
