@@ -19,6 +19,7 @@ export class ContestService {
         });
     }
 
+    // Todo:: 비밀번호 암호화
     async CreateContest(dto: CreateContestDTO) {
         const { start_date, end_date, password, name } = dto;
         const sqlQuery = 'INSERT INTO bsmoj.contest (start_date, end_date, password, name) VALUES(?, ?, ?, ?)';
@@ -72,6 +73,7 @@ export class ContestService {
         return problems;
     }
 
+    // Todo::Contest, Problem이 존재하지 않을 때 예외처리
     async CreateContestProblemById(dto: CreateProblemDTO) {
         const { problem_id, contest_id } = dto;
         const sqlQuery = 'INSERT INTO bsmoj.contest_problem (problem_id, contest_id) VALUES(?,?)';

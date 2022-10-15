@@ -26,6 +26,13 @@ export class UserController {
     }
 
     @UseGuards(JwtAuthGuard)
+    @Get('logout')
+    logout(@Res({passthrough: true}) res: Response) {
+        return this.userservice.logout(res);
+    }
+
+
+    @UseGuards(JwtAuthGuard)
     @Get()
     getMyInfo(@GetUser() user: User): User {
         return user;

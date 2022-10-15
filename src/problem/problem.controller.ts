@@ -27,9 +27,8 @@ export class ProblemController {
 
 	@Get(':ProblemId')
 	viewProblemInfo(
-		@GetUser() user: User,
 		@Param() dto: ViewProblemInfoDTO): Promise<ProblemInfoDTO> {
-		return this.problemservice.ViewProblemInfo(user, dto);
+		return this.problemservice.ViewProblemInfo(dto);
 	}
 
 	@Post()

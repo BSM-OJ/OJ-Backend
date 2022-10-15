@@ -71,6 +71,12 @@ export class UserService {
         }
     }
 
+    async logout(res: Response) {
+        const token = res.get('token');
+        if (token === null) throw new NotFoundException('토큰이 존재하지 않습니다.');
+        res.clearCookie('token');
+    }
+
     async ViewSolvedProblems(user: User): Promise<ViewSolvedProblemDTO> {
         const { id } = user;
         console.log(id);
