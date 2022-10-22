@@ -63,16 +63,16 @@ export class ContestController {
         return this.contestservice.DeleteContest(params.contestid);
     }
 
-    @Post('/user')
-    @UseGuards(JwtAuthGuard) 
-    createUser(@Body() dto:CreateUserDTO) {
-        return this.contestservice.CreateUser(dto);
-    }
+    // @Post('/user')
+    // @UseGuards(JwtAuthGuard) 
+    // createUser(@Body() dto:CreateUserDTO) {
+    //     return this.contestservice.CreateUser(dto);
+    // }
     
-    @Delete('/user/:userId')
-    @UseGuards(JwtAuthGuard)
-    deleteUser(@Body() dto:DeleteUserDTO) {
-        return this.contestservice.DeleteUser(dto);
-    }
+    // @Delete('/user/:userId')
+    // @UseGuards(JwtAuthGuard)
+    // deleteUser(@Body() dto: DeleteUserDTO) {
+    //     return this.contestservice.DeleteUser(dto);
+    // }
 
 }
